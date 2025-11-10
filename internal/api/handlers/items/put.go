@@ -23,22 +23,22 @@ func (h *Handler) PutItem(c *ginext.Context) {
 	}
 	id := uint(idInt)
 
-	var sale models.ItemDTO
-	if err := json.NewDecoder(c.Request.Body).Decode(&sale); err != nil {
+	var item models.ItemDTO
+	if err := json.NewDecoder(c.Request.Body).Decode(&item); err != nil {
 		zlog.Logger.Error().Err(err).Msg("failed to decode request body")
 		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
 		return
 	}
 
-	if err := h.validator.Struct(sale); err != nil {
+	if err := h.validator.Struct(item); err != nil {
 		zlog.Logger.Error().Err(err).Msg("failed to validate request body")
 		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("validation error: %s", err.Error()))
 		return
 	}
 
-	err = h.service.ReplaceItem(c.Request.Context(), id, &sale)
+	err = h.service.ReplaceItem(c.Request.Context(), id, &item)
 	if err != nil {
-		zlog.Logger.Error().Err(err).Interface("item", sale).Msg("failed to replace item")
+		zlog.Logger.Error().Err(err).Interface("item", item).Msg("failed to replace item")
 		handlers.Fail(c.Writer, http.StatusInternalServerError, fmt.Errorf("internal server error"))
 		return
 	}
