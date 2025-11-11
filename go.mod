@@ -4,6 +4,7 @@ go 1.25.3
 
 require (
 	github.com/go-playground/validator/v10 v10.28.0
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/wb-go/wbf v0.0.8
 )
 
