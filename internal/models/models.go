@@ -39,10 +39,11 @@ type UserWithHashDomain struct {
 type UserWithHashDB struct {
 	ID   uint   `json:"id" db:"id" validate:"required"`
 	Hash []byte `json:"hash" db:"hash" validate:"required"`
+	Role string `json:"role" db:"role" validate:"required"`
 }
 
 type Claims struct {
-	UserID      uint
-	Permissions []string
+	Role   string
+	UserID uint
 	jwt.RegisteredClaims
 }

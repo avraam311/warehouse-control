@@ -24,13 +24,11 @@ func (s *Service) Login(ctx context.Context, usr *models.UserDTO) (string, error
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Hash), []byte(usr.Password)); err != nil {
 		return "", ErrWrongPassword
 	}
-	permissions, err := s.repo.GetUserPermissions(ctx, usr.Email)
-	if err != nil {
-		return "", fmt.Errorf("service/login.go - %w", err)
-	}
+
+	role := user.Role
 	claims := &models.Claims{
-		UserID:      user.ID,
-		Permissions: permissions.Routes,
+		Role:   role,
+		UserID: user.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -38,7 +36,7 @@ func (s *Service) Login(ctx context.Context, usr *models.UserDTO) (string, error
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.cfg.GetString("auth.jwt_key"))
+	tokenString, err := token.SignedString(s.cfg.GetString("JWT_SECRET"))
 	if err != nil {
 		return "", err
 	}

@@ -19,7 +19,7 @@ func NewRouter(cfg *config.Config, handlerItem *items.Handler, handlerAuth *auth
 	e.Use(ginext.Recovery())
 
 	api := e.Group("/warehouse-control/api")
-	api.Use(middlewares.RoleBasedAuthMiddleware(cfg.GetString("auth.jwt_secret"), cfg.GetStringSlice("auth.allowed_roles")))
+	api.Use(middlewares.RoleBasedAuthMiddleware(cfg.GetString("JWT_SECRET")))
 	{
 		api.POST("/auth/register", handlerAuth.Register)
 		api.POST("/auth/login", handlerAuth.Login)

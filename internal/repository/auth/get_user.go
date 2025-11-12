@@ -9,7 +9,7 @@ import (
 
 func (r *Repository) GetUser(ctx context.Context, email string) (*models.UserWithHashDB, error) {
 	query := `
-		SELECT id, hash
+		SELECT id, hash, role
 		FROM user
 		WHERE email = $1;
 	`

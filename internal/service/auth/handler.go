@@ -10,7 +10,6 @@ import (
 type Repository interface {
 	CreateUser(context.Context, *models.UserWithHashDomain) (uint, error)
 	GetUser(context.Context, string) (*models.UserWithHashDB, error)
-	GetUserPermissions(context.Context, string) (*models.UserPermissionsDB, error)
 }
 
 type Service struct {

@@ -20,6 +20,18 @@ func (h *Handler) Register(c *ginext.Context) {
 		return
 	}
 
+	// Валидация роли
+	validRoles := map[string]struct{}{
+		"admin":   {},
+		"manager": {},
+		"viewer":  {},
+	}
+	if _, ok := validRoles[user.Role]; !ok {
+		zlog.Logger.Error().Msgf("invalid role: %s", user.Role)
+		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("invalid role: %s", user.Role))
+		return
+	}
+
 	if err := h.validator.Struct(user); err != nil {
 		zlog.Logger.Error().Err(err).Msg("failed to validate request body")
 		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("validation error: %s", err.Error()))

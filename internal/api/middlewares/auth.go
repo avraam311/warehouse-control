@@ -14,14 +14,33 @@ var (
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrInvalidTokenClaims = errors.New("invalid token claims")
 	ErrRoleNotFound       = errors.New("role not found in token")
-	ErrAccessForbidden    = errors.New("access forbidden: insufficient role")
+	ErrAccessForbidden    = errors.New("access forbidden: insufficient permission")
 )
+
+var rolePermissions = map[string]map[string]struct{}{
+	"admin": {
+		"POST:/auth/register": {},
+		"POST:/auth/login":    {},
+		"POST:/items":         {},
+		"GET:/items":          {},
+		"PUT:/items/:id":      {},
+		"DELETE:/items/:id":   {},
+	},
+	"manager": {
+		"POST:/auth/login": {},
+		"GET:/items":       {},
+		"PUT:/items/:id":   {},
+	},
+	"viewer": {
+		"GET:/items": {},
+	},
+}
 
 func abortWithError(c *ginext.Context, status int, err error) {
 	c.AbortWithStatusJSON(status, ginext.H{"error": err.Error()})
 }
 
-func RoleBasedAuthMiddleware(jwtSecret string, allowedRoles []string) ginext.HandlerFunc {
+func RoleBasedAuthMiddleware(jwtSecret string) ginext.HandlerFunc {
 	return func(c *ginext.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
@@ -54,14 +73,17 @@ func RoleBasedAuthMiddleware(jwtSecret string, allowedRoles []string) ginext.Han
 			return
 		}
 
-		allowed := false
-		for _, r := range allowedRoles {
-			if r == role {
-				allowed = true
-				break
-			}
+		method := c.Request.Method
+		path := c.FullPath()
+
+		key := method + ":" + path
+		perms, ok := rolePermissions[role]
+		if !ok {
+			abortWithError(c, http.StatusForbidden, ErrAccessForbidden)
+			return
 		}
-		if !allowed {
+
+		if _, allowed := perms[key]; !allowed {
 			abortWithError(c, http.StatusForbidden, ErrAccessForbidden)
 			return
 		}
