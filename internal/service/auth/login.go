@@ -16,7 +16,7 @@ var (
 	ErrWrongPassword = errors.New("wrong password")
 )
 
-func (s *Service) Login(ctx context.Context, usr *models.UserDTO, jwtKey string) (string, error) {
+func (s *Service) Login(ctx context.Context, usr *models.UserDTO) (string, error) {
 	user, err := s.repo.GetUser(ctx, usr.Email)
 	if err != nil {
 		return "", fmt.Errorf("service/login.go - %w", err)
@@ -38,7 +38,7 @@ func (s *Service) Login(ctx context.Context, usr *models.UserDTO, jwtKey string)
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(s.cfg.GetString("auth.jwt_key"))
 	if err != nil {
 		return "", err
 	}
