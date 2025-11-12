@@ -13,7 +13,7 @@ import (
 )
 
 func (h *Handler) Register(c *ginext.Context) {
-	var user models.UserDTOWithRole
+	var user models.UserWithRoleDTO
 	if err := json.NewDecoder(c.Request.Body).Decode(&user); err != nil {
 		zlog.Logger.Error().Err(err).Msg("failed to decode request body")
 		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))

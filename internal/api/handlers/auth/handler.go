@@ -6,12 +6,11 @@ import (
 	"github.com/avraam311/warehouse-control/internal/models"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type Service interface {
-	Register(context.Context, *models.UserDTOWithRole) (uint, error)
-	Login(context.Context, *models.UserDTO) (*jwt.Token, error)
+	Register(context.Context, *models.UserWithRoleDTO) (uint, error)
+	Login(context.Context, *models.UserDTO) (string, error)
 }
 
 type Handler struct {
