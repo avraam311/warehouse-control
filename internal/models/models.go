@@ -43,7 +43,7 @@ type UserWithHashDB struct {
 }
 
 type Claims struct {
-	Role   string
-	UserID uint
+	Role   string `json:"role" validate:"required"`
+	UserID uint   `json:"user_id" validate:"required"`
 	jwt.RegisteredClaims
 }

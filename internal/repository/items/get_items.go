@@ -10,16 +10,27 @@ import (
 func (r *Repository) GetItems(ctx context.Context, userID uint) ([]*models.ItemDB, error) {
 	var items []*models.ItemDB
 
-	if _, err := r.db.ExecContext(ctx, "SET LOCAL myapp.current_user_id = $1", userID); err != nil {
-		return items, fmt.Errorf("repository/get_items.go - failed to set local user_id: %w", err)
+	tx, err := r.db.Master.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("repository/get_items.go - failed to begin tx: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	setUserIDQuery := fmt.Sprintf("SET LOCAL myapp.current_user_id = %d", userID)
+	if _, err = tx.ExecContext(ctx, setUserIDQuery); err != nil {
+		return nil, fmt.Errorf("repository/get_items.go - failed to set local user_id: %w", err)
 	}
 
 	query := `
-		SELECT id, name, description, price
-		FROM item
-	`
+        SELECT id, name, description, price
+        FROM item
+    `
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("repository/get_items.go - failed to get items - %w", err)
 	}
@@ -35,6 +46,10 @@ func (r *Repository) GetItems(ctx context.Context, userID uint) ([]*models.ItemD
 	}
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("repository/get_items.go - failed to iterate items rows - %w", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("repository/get_items.go - failed to commit tx: %w", err)
 	}
 
 	return items, nil

@@ -12,12 +12,12 @@ import (
 func (r *Repository) GetUser(ctx context.Context, email string) (*models.UserWithHashDB, error) {
 	query := `
 		SELECT id, hash, role
-		FROM user
+		FROM "user"
 		WHERE email = $1;
 	`
 
 	user := models.UserWithHashDB{}
-	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Hash)
+	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Hash, &user.Role)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound

@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS "user" (
     id SERIAL PRIMARY KEY,
     email VARCHAR(50) UNIQUE NOT NULL,
     role VARCHAR(10) NOT NULL,
@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS user (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS "user";
 -- +goose StatementEnd

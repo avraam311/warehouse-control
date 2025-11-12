@@ -25,9 +25,8 @@ func (s *Service) Login(ctx context.Context, usr *models.UserDTO) (string, error
 		return "", ErrWrongPassword
 	}
 
-	role := user.Role
 	claims := &models.Claims{
-		Role:   role,
+		Role:   user.Role,
 		UserID: user.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
@@ -36,9 +35,9 @@ func (s *Service) Login(ctx context.Context, usr *models.UserDTO) (string, error
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.cfg.GetString("JWT_SECRET"))
+	tokenString, err := token.SignedString([]byte(s.cfg.GetString("JWT_SECRET")))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("service/login.go - failed to sign jwt toker - %w", err)
 	}
 
 	return tokenString, nil

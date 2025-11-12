@@ -19,15 +19,20 @@ func NewRouter(cfg *config.Config, handlerItem *items.Handler, handlerAuth *auth
 	e.Use(ginext.Recovery())
 
 	api := e.Group("/warehouse-control/api")
-	api.Use(middlewares.RoleBasedAuthMiddleware(cfg.GetString("JWT_SECRET")))
-	{
-		api.POST("/auth/register", handlerAuth.Register)
-		api.POST("/auth/login", handlerAuth.Login)
 
-		api.POST("/items", handlerItem.CreateItem)
-		api.GET("/items", handlerItem.GetItems)
-		api.PUT("/items/:id", handlerItem.PutItem)
-		api.DELETE("/items/:id", handlerItem.DeleteItem)
+	auth := api.Group("/auth")
+	{
+		auth.POST("/login", handlerAuth.Login)
+		auth.POST("/register", middlewares.RoleBasedAuthMiddleware(cfg.GetString("JWT_SECRET")), handlerAuth.Register)
+	}
+
+	items := api.Group("/items")
+	items.Use(middlewares.RoleBasedAuthMiddleware(cfg.GetString("JWT_SECRET")))
+	{
+		items.POST("/", handlerItem.CreateItem)
+		items.GET("/", handlerItem.GetItems)
+		items.PUT("/:id", handlerItem.PutItem)
+		items.DELETE("/:id", handlerItem.DeleteItem)
 	}
 
 	return e

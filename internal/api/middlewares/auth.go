@@ -20,20 +20,20 @@ var (
 
 var rolePermissions = map[string]map[string]struct{}{
 	"admin": {
-		"POST:/auth/register": {},
-		"POST:/auth/login":    {},
-		"POST:/items":         {},
-		"GET:/items":          {},
-		"PUT:/items/:id":      {},
-		"DELETE:/items/:id":   {},
+		"POST:/warehouse-control/api/auth/register": {},
+		"POST:/warehouse-control/api/auth/login/":   {},
+		"POST:/warehouse-control/api/items/":        {},
+		"GET:/warehouse-control/api/items/":         {},
+		"PUT:/warehouse-control/api/items/:id":      {},
+		"DELETE:/warehouse-control/api/items/:id":   {},
 	},
 	"manager": {
-		"POST:/auth/login": {},
-		"GET:/items":       {},
-		"PUT:/items/:id":   {},
+		"POST:/warehouse-control/api/auth/login/": {},
+		"GET:/warehouse-control/api/items/":       {},
+		"PUT:/warehouse-control/api/items/:id":    {},
 	},
 	"viewer": {
-		"GET:/items": {},
+		"GET:/warehouse-control/api/items/": {},
 	},
 }
 
@@ -68,7 +68,7 @@ func RoleBasedAuthMiddleware(jwtSecret string) ginext.HandlerFunc {
 			return
 		}
 
-		role, ok := claims["role"].(string)
+		role, ok := claims["Role"].(string)
 		if !ok {
 			abortWithError(c, http.StatusForbidden, ErrRoleNotFound)
 			return
@@ -83,19 +83,19 @@ func RoleBasedAuthMiddleware(jwtSecret string) ginext.HandlerFunc {
 			abortWithError(c, http.StatusForbidden, ErrAccessForbidden)
 			return
 		}
-
 		if _, allowed := perms[key]; !allowed {
 			abortWithError(c, http.StatusForbidden, ErrAccessForbidden)
 			return
 		}
 
-		user_id, ok := claims["user_id"].(uint)
+		userIDFloat, ok := claims["UserID"].(float64)
 		if !ok {
 			abortWithError(c, http.StatusForbidden, ErrUserIDNotFound)
 			return
 		}
+		userID := uint(userIDFloat)
 
-		c.Set("user_id", user_id)
+		c.Set("user_id", userID)
 		c.Set("role", role)
 		c.Next()
 	}

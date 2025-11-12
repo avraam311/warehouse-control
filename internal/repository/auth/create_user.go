@@ -6,9 +6,8 @@ import (
 	"fmt"
 
 	"github.com/avraam311/warehouse-control/internal/models"
-	
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgerrcode"
+
+	"github.com/lib/pq"
 )
 
 func (r *Repository) CreateUser(ctx context.Context, usr *models.UserWithHashDomain) (uint, error) {
@@ -21,14 +20,15 @@ func (r *Repository) CreateUser(ctx context.Context, usr *models.UserWithHashDom
 	var id uint
 	err := r.db.QueryRowContext(ctx, query, usr.Email, usr.Hash, usr.Role).Scan(&id)
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-			if pgErr.ConstraintName == "user_email_key" {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23505" && pqErr.Constraint == "user_email_key" {
 				return 0, ErrDuplicateEmail
 			}
 		}
 
 		return 0, fmt.Errorf("repository/create_user.go - failed to create user: %w", err)
 	}
+
 	return id, nil
 }
