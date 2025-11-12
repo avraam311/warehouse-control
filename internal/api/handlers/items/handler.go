@@ -9,10 +9,10 @@ import (
 )
 
 type Service interface {
-	CreateItem(context.Context, *models.ItemDTO) (uint, error)
-	GetItems(context.Context) ([]*models.ItemDB, error)
-	ReplaceItem(context.Context, uint, *models.ItemDTO) error
-	DeleteItem(context.Context, uint) error
+	CreateItem(context.Context, *models.ItemDTO, uint) (uint, error)
+	GetItems(context.Context, uint) ([]*models.ItemDB, error)
+	ReplaceItem(context.Context, uint, *models.ItemDTO, uint) error
+	DeleteItem(context.Context, uint, uint) error
 }
 
 type Handler struct {

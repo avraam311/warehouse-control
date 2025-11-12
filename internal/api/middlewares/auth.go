@@ -13,6 +13,7 @@ var (
 	ErrAuthHeaderMissing  = errors.New("authorization header missing or invalid")
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrInvalidTokenClaims = errors.New("invalid token claims")
+	ErrUserIDNotFound     = errors.New("user_id not found in token")
 	ErrRoleNotFound       = errors.New("role not found in token")
 	ErrAccessForbidden    = errors.New("access forbidden: insufficient permission")
 )
@@ -88,6 +89,13 @@ func RoleBasedAuthMiddleware(jwtSecret string) ginext.HandlerFunc {
 			return
 		}
 
+		user_id, ok := claims["user_id"].(uint)
+		if !ok {
+			abortWithError(c, http.StatusForbidden, ErrUserIDNotFound)
+			return
+		}
+
+		c.Set("user_id", user_id)
 		c.Set("role", role)
 		c.Next()
 	}

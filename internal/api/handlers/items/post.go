@@ -28,7 +28,15 @@ func (h *Handler) CreateItem(c *ginext.Context) {
 		return
 	}
 
-	id, err := h.service.CreateItem(c.Request.Context(), &item)
+	userIDAny, ok := c.Get("user_id")
+	if !ok {
+		zlog.Logger.Error().Msg("failed to get user_id from context")
+		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("failed to get user_id from context"))
+		return
+	}
+	userID := userIDAny.(uint)
+
+	id, err := h.service.CreateItem(c.Request.Context(), &item, userID)
 	if err != nil {
 		if errors.Is(err, items.ErrDuplicateItemName) {
 			zlog.Logger.Error().Err(err).Interface("item", item).Msg("item.name already exists")

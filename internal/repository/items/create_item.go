@@ -11,7 +11,11 @@ import (
 	"github.com/jackc/pgerrcode"
 )
 
-func (r *Repository) CreateItem(ctx context.Context, item *models.ItemDTO) (uint, error) {
+func (r *Repository) CreateItem(ctx context.Context, item *models.ItemDTO, userID uint) (uint, error) {
+	if _, err := r.db.ExecContext(ctx, "SET LOCAL myapp.current_user_id = $1", userID); err != nil {
+		return 0, fmt.Errorf("repository/create_item.go - failed to set local user_id: %w", err)
+	}
+
 	query := `
         INSERT INTO item (name, description, price)
         VALUES ($1, $2, $3)

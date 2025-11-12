@@ -23,7 +23,15 @@ func (h *Handler) DeleteItem(c *ginext.Context) {
 	}
 	id := uint(idInt)
 
-	err = h.service.DeleteItem(c.Request.Context(), id)
+	userIDAny, ok := c.Get("user_id")
+	if !ok {
+		zlog.Logger.Error().Msg("failed to get user_id from context")
+		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("failed to get user_id from context"))
+		return
+	}
+	userID := userIDAny.(uint)
+
+	err = h.service.DeleteItem(c.Request.Context(), id, userID)
 	if err != nil {
 		if errors.Is(err, items.ErrItemNotFound) {
 			zlog.Logger.Error().Err(err).Interface("id", id).Msg("item not found")

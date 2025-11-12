@@ -38,7 +38,15 @@ func (h *Handler) PutItem(c *ginext.Context) {
 		return
 	}
 
-	err = h.service.ReplaceItem(c.Request.Context(), id, &item)
+	userIDAny, ok := c.Get("user_id")
+	if !ok {
+		zlog.Logger.Error().Msg("failed to get user_id from context")
+		handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("failed to get user_id from context"))
+		return
+	}
+	userID := userIDAny.(uint)
+
+	err = h.service.ReplaceItem(c.Request.Context(), id, &item, userID)
 	if err != nil {
 		if errors.Is(err, items.ErrItemNotFound) {
 			zlog.Logger.Error().Err(err).Interface("id", id).Msg("item not found")
