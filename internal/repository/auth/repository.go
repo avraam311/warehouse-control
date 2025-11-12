@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrUserNotFound = errors.New("user not found")
+	ErrUserNotFound   = errors.New("user not found")
+	ErrDuplicateEmail = errors.New("email already exists")
 )
 
 type Repository struct {

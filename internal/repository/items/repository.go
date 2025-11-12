@@ -7,7 +7,9 @@ import (
 )
 
 var (
-	ErrItemNotFound = errors.New("item not found")
+	ErrItemNotFound             = errors.New("item not found")
+	ErrDuplicateItemName        = errors.New("item name already exists")
+	ErrDuplicateItemDescription = errors.New("item description already exists")
 )
 
 type Repository struct {

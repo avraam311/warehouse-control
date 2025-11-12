@@ -2,12 +2,14 @@ package items
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/avraam311/warehouse-control/internal/api/handlers"
 	"github.com/avraam311/warehouse-control/internal/models"
+	"github.com/avraam311/warehouse-control/internal/repository/items"
 
 	"github.com/wb-go/wbf/ginext"
 	"github.com/wb-go/wbf/zlog"
@@ -38,6 +40,12 @@ func (h *Handler) PutItem(c *ginext.Context) {
 
 	err = h.service.ReplaceItem(c.Request.Context(), id, &item)
 	if err != nil {
+		if errors.Is(err, items.ErrItemNotFound) {
+			zlog.Logger.Error().Err(err).Interface("id", id).Msg("item not found")
+			handlers.Fail(c.Writer, http.StatusBadRequest, fmt.Errorf("item not found"))
+			return
+		}
+
 		zlog.Logger.Error().Err(err).Interface("item", item).Msg("failed to replace item")
 		handlers.Fail(c.Writer, http.StatusInternalServerError, fmt.Errorf("internal server error"))
 		return
