@@ -26,9 +26,7 @@ A robust REST API service built in Go for managing warehouse inventory and user 
 ## Quick Start
 
 ### Prerequisites
-- Go 1.25.3 or later
 - Docker and Docker Compose
-- PostgreSQL (handled via Docker)
 
 ### Installation
 

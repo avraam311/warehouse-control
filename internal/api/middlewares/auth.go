@@ -21,16 +21,17 @@ var (
 var rolePermissions = map[string]map[string]struct{}{
 	"admin": {
 		"POST:/warehouse-control/api/auth/register": {},
-		"POST:/warehouse-control/api/auth/login/":   {},
+		"POST:/warehouse-control/api/auth/login":    {},
 		"POST:/warehouse-control/api/items/":        {},
 		"GET:/warehouse-control/api/items/":         {},
 		"PUT:/warehouse-control/api/items/:id":      {},
 		"DELETE:/warehouse-control/api/items/:id":   {},
 	},
 	"manager": {
-		"POST:/warehouse-control/api/auth/login/": {},
+		"POST:/warehouse-control/api/auth/login":  {},
 		"GET:/warehouse-control/api/items/":       {},
 		"PUT:/warehouse-control/api/items/:id":    {},
+		"DELETE:/warehouse-control/api/items/:id": {},
 	},
 	"viewer": {
 		"GET:/warehouse-control/api/items/": {},

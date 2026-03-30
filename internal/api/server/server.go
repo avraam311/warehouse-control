@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/avraam311/warehouse-control/internal/api/handlers/auth"
+	"github.com/avraam311/warehouse-control/internal/api/handlers/history"
 	"github.com/avraam311/warehouse-control/internal/api/handlers/items"
 	"github.com/avraam311/warehouse-control/internal/api/middlewares"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/wb-go/wbf/ginext"
 )
 
-func NewRouter(cfg *config.Config, handlerItem *items.Handler, handlerAuth *auth.Handler) *ginext.Engine {
+func NewRouter(cfg *config.Config, handlerItem *items.Handler, handlerAuth *auth.Handler, handlerHistory *history.Handler) *ginext.Engine {
 	e := ginext.New(cfg.GetString("server.gin_mode"))
 
 	e.Use(middlewares.CORSMiddleware())
@@ -33,6 +34,14 @@ func NewRouter(cfg *config.Config, handlerItem *items.Handler, handlerAuth *auth
 		items.GET("/", handlerItem.GetItems)
 		items.PUT("/:id", handlerItem.PutItem)
 		items.DELETE("/:id", handlerItem.DeleteItem)
+	}
+
+	history := api.Group("/history")
+	history.Use(middlewares.RoleBasedAuthMiddleware(cfg.GetString("JWT_SECRET")))
+	{
+		history.GET("/", handlerHistory.GetHistory)
+		history.GET("/export", handlerHistory.ExportHistory)
+		history.POST("/compare", handlerHistory.CompareVersions)
 	}
 
 	return e

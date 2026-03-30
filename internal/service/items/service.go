@@ -11,6 +11,8 @@ type Repository interface {
 	GetItems(context.Context, uint) ([]*models.ItemDB, error)
 	ReplaceItem(context.Context, uint, *models.ItemDTO, uint) error
 	DeleteItem(context.Context, uint, uint) error
+	GetHistory(context.Context, *models.HistoryFilter, uint) ([]*models.HistoryItem, error)
+	ExportHistoryCSV(context.Context, *models.HistoryFilter, uint) ([]byte, error)
 }
 
 type Service struct {

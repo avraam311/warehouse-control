@@ -11,6 +11,21 @@ import (
 )
 
 func (r *Repository) CreateItem(ctx context.Context, item *models.ItemDTO, userID uint) (uint, error) {
+	tx, err := r.db.Master.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("repository/create_item.go - failed to begin tx: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	setUserIDQuery := fmt.Sprintf("SET LOCAL myapp.current_user_id = %d", userID)
+	if _, err = tx.ExecContext(ctx, setUserIDQuery); err != nil {
+		return 0, fmt.Errorf("repository/create_item.go - failed to set local user_id: %w", err)
+	}
+
 	query := `
         INSERT INTO item (name, description, price)
         VALUES ($1, $2, $3)
@@ -18,7 +33,7 @@ func (r *Repository) CreateItem(ctx context.Context, item *models.ItemDTO, userI
     `
 
 	var id uint
-	err := r.db.QueryRowContext(ctx, query, item.Name, item.Description, item.Price).Scan(&id)
+	err = tx.QueryRowContext(ctx, query, item.Name, item.Description, item.Price).Scan(&id)
 	if err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
@@ -32,6 +47,10 @@ func (r *Repository) CreateItem(ctx context.Context, item *models.ItemDTO, userI
 			}
 		}
 		return 0, fmt.Errorf("repository/create_item.go - failed to create item: %w", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return 0, fmt.Errorf("repository/create_item.go - failed to commit tx: %w", err)
 	}
 	return id, nil
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	handlerAuth "github.com/avraam311/warehouse-control/internal/api/handlers/auth"
+	handlerHistory "github.com/avraam311/warehouse-control/internal/api/handlers/history"
 	handlerItems "github.com/avraam311/warehouse-control/internal/api/handlers/items"
 	"github.com/avraam311/warehouse-control/internal/api/server"
 	repositoryAn "github.com/avraam311/warehouse-control/internal/repository/auth"
@@ -63,11 +64,12 @@ func main() {
 	repoItems := repositoryItems.NewRepository(db)
 	srvcItems := serviceItems.NewService(repoItems)
 	handItems := handlerItems.NewHandler(srvcItems, val)
+	handHistory := handlerHistory.NewHandler(srvcItems)
 	repoAuth := repositoryAn.NewRepository(db)
 	srvcAuth := serviceAn.NewService(repoAuth, cfg)
 	handAuth := handlerAuth.NewHandler(srvcAuth, val)
 
-	router := server.NewRouter(cfg, handItems, handAuth)
+	router := server.NewRouter(cfg, handItems, handAuth, handHistory)
 	srv := server.NewServer(cfg.GetString("server.port"), router)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
